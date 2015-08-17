@@ -12,6 +12,8 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
+import supersample.todoapplication.model.TodoItem;
+
 public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "todo_items_db";
@@ -48,8 +50,8 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
 
     }
 
-    public ArrayList<String> getToDoItemListFromTable() {
-        ArrayList<String> todoItemString = null;
+    public ArrayList<TodoItem> getToDoItemListFromTable() {
+        ArrayList<TodoItem> todoItemString = null;
         String selectTodoItemQuery = "SELECT  * FROM " + SQLiteDatabaseUtils.TABLE_TODO;
         Cursor cursor = null;
         SQLiteDatabase db = null;
@@ -59,7 +61,9 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
             if (cursor != null && cursor.moveToFirst()) {
                 todoItemString = new ArrayList<>();
                 do {
-                    todoItemString.add(cursor.getString(1));
+                    TodoItem item = new TodoItem();
+                    item.setTodoItem(cursor.getString(1));
+                    todoItemString.add(item);
                 } while (cursor.moveToNext());
             }
         } finally {

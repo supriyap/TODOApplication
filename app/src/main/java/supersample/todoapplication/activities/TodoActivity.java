@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -14,7 +13,9 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import supersample.todoapplication.R;
+import supersample.todoapplication.adapter.TodoAdapter;
 import supersample.todoapplication.fragment.EditDialogFragment;
+import supersample.todoapplication.model.TodoItem;
 import supersample.todoapplication.utils.SQLiteDatabaseHelper;
 
 public class TodoActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemLongClickListener {
@@ -22,8 +23,8 @@ public class TodoActivity extends AppCompatActivity implements View.OnClickListe
     private EditText todoEditText;
     private Button mAddbtn;
     private SQLiteDatabaseHelper databaseHelper;
-    private ArrayList<String> mTodoList = new ArrayList<>();
-    private ArrayAdapter<String> mArrayAdapter;
+    private ArrayList<TodoItem> mTodoList = new ArrayList<>();
+    private TodoAdapter mTodoAdapter;
     private int editPosition;
 
     @Override
@@ -38,11 +39,12 @@ public class TodoActivity extends AppCompatActivity implements View.OnClickListe
 
         databaseHelper = new SQLiteDatabaseHelper(this);
         if (databaseHelper.getToDoItemListFromTable() != null) {
-            ArrayList<String> stringArrayList = databaseHelper.getToDoItemListFromTable();
-            mTodoList.addAll(stringArrayList);
+            ArrayList<TodoItem> todoItemList = databaseHelper.getToDoItemListFromTable();
+            mTodoList.addAll(todoItemList);
+
         }
-        mArrayAdapter = new ArrayAdapter<>(this, R.layout.list_item, mTodoList);
-        mListView.setAdapter(mArrayAdapter);
+        mTodoAdapter = new TodoAdapter(this, mTodoList);
+        mListView.setAdapter(mTodoAdapter);
         mListView.setOnItemLongClickListener(this);
     }
 
@@ -60,16 +62,18 @@ public class TodoActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void addBtnClicked(String newItem) {
-        mTodoList.add(newItem);
-        mArrayAdapter.notifyDataSetChanged();
+        TodoItem item = new TodoItem();
+        item.setTodoItem(newItem);
+        mTodoList.add(item);
+        mTodoAdapter.notifyDataSetChanged();
         databaseHelper.insertTodoItemInDatabase(newItem);
     }
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        String item = (String) parent.getItemAtPosition(position);
+        TodoItem item = (TodoItem) parent.getItemAtPosition(position);
         editPosition = position;
-        inflateEditItemFragment(item);
+        inflateEditItemFragment(item.getTodoItem());
         return true;
     }
 
@@ -90,9 +94,11 @@ public class TodoActivity extends AppCompatActivity implements View.OnClickListe
     private EditDialogFragment.DialogFragmentListener mDialogFragmentListener = new EditDialogFragment.DialogFragmentListener() {
         @Override
         public void onSave(String updatedString) {
-            String oldItemString = mTodoList.get(editPosition);
-            mTodoList.set(editPosition, updatedString);
-            mArrayAdapter.notifyDataSetChanged();
+            String oldItemString = mTodoList.get(editPosition).getTodoItem();
+            TodoItem item = new TodoItem();
+            item.setTodoItem(updatedString);
+            mTodoList.set(editPosition, item);
+            mTodoAdapter.notifyDataSetChanged();
             databaseHelper.updateTodoItem(updatedString, oldItemString);
             Toast.makeText(TodoActivity.this, "Successfully Updated", Toast.LENGTH_LONG).show();
         }

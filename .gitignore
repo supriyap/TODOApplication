@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 .gradle
 /local.properties
 /.idea/workspace.xml
@@ -34,4 +34,3 @@ proguard/
 
 # Log Files
 *.log
->>>>>>> 915af2c8ce046c14469870e71066c64aaad8ca92

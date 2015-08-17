@@ -1,6 +1,5 @@
 .DS_Store
-/build
-=======
+/builld
 # Built application files
 *.apk
 *.ap_
